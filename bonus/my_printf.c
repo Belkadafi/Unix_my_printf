@@ -1,0 +1,101 @@
+/*
+** EPITECH PROJECT, 2019
+** my_printf
+** File description:
+** my_printf
+*/
+
+#include "include/include.h"
+
+static ptr_t tab[] =
+{
+    {'d', my_print_nbr},
+    {'s', my_print_str},
+    {'c', my_print_char},
+    {'u', my_print_unsigned},
+    {'o', my_print_octal},
+    {'x', my_print_hexa},
+    {'X', my_print_hexa_capitalize},
+    {'i', my_print_nbr},
+    {'p', my_print_pointer_adress},
+    {'b', my_print_binary},
+    {'S', my_print_show_char},
+    {'A', my_print_string_array},
+    {'I', my_print_int_array}
+};
+
+char *my_get_size(char const *format)
+{
+    char *tempo;
+    int i = 0;
+    tempo = malloc(10);
+
+    while (format[i] >= '0' && format[i] <= '9') {
+        tempo[i] = format[i];
+        i += 1;
+    }
+    return tempo;
+}
+
+int my_print_nicely(char const *format, va_list ap)
+{
+    int result;
+    char *tempo;
+    tempo = my_get_size(format);
+    int i = my_strlen(tempo);
+    char thing = ' ';
+
+    if (tempo[0] == '0') {
+        thing = '0';
+    }
+    result = my_getnbr(tempo);
+    for (int icr = 0; icr < 13; icr += 1) {
+        if (format[i] == tab[icr].c) {
+            tab[icr].ptr(ap, result, thing, 0);
+        }
+    }
+    return (i);
+}
+
+int my_crossroad(char const *format, va_list ap, int i, int j)
+{
+    if (*(format + 1) >= '0' && *(format + 1) <= '9') {
+        j = my_print_nicely(&format[1], ap);
+        i = 1;
+    }
+    else {
+        for (int icr = 0; icr < 13; icr += 1) {
+            if (*(format + 1) == tab[icr].c) {
+                tab[icr].ptr(ap, 0, 'a', 0);
+                i = 1;
+                j = 0;
+            }
+        }
+    }
+    if (i == 0) {
+        my_putchar('%');
+        my_putchar(format[1]);
+    }
+    return (j);
+}
+
+int my_printf(char const *format, ...)
+{
+    int j = 0;
+    va_list ap;
+
+    va_start(ap, format);
+    for (int i = 0; format[i] != '\0'; i += 1) {
+        if (format[i] == '%' && format[i + 1] == '%') {
+            i += 1;
+            my_putchar('%');
+            }
+        else if (format[i] == '%' && format[i + 1] != '%') {
+            j = my_crossroad(&format[i], ap, 0, 0);
+            i += j + 1;
+            }
+        else
+            my_putchar(format[i]);
+    }
+    va_end(ap);
+}
